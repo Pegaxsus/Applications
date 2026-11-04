@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SpriteLab</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body data-theme="light">
+<header class="app-header">
+    <h1 data-i18n="toolTitle">SpriteLab</h1>
+    <div class="header-controls">
+      <div class="icon-group" role="group" data-i18n-aria="languageGroup" aria-label="Idioma">
+        <button class="icon-button" type="button" data-language="es" aria-label="Español" title="Español" aria-pressed="true">
+          <svg viewBox="0 0 32 24" aria-hidden="true"><rect x="2" y="3" width="28" height="18" rx="2"/><path d="M2 8h28M2 16h28"/><path d="M10 10v4c0 2 4 2 4 0v-4zM10 12h4"/></svg>
+        </button>
+        <button class="icon-button" type="button" data-language="en" aria-label="English" title="English" aria-pressed="false">
+          <svg viewBox="0 0 32 24" aria-hidden="true"><rect x="2" y="3" width="28" height="18" rx="2"/><path d="m3 4 26 16M29 4 3 20M16 3v18M2 12h28"/><path d="M13 3v6H2m28 0H19V3M2 15h11v6m6 0v-6h11"/></svg>
+        </button>
+      </div>
+      <span class="control-divider" aria-hidden="true"></span>
+      <div class="icon-group" role="group" data-i18n-aria="themeGroup" aria-label="Tema">
+        <button class="icon-button" type="button" data-theme-choice="light" data-i18n-aria="lightTheme" aria-label="Tema claro" title="Tema claro" aria-pressed="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>
+        </button>
+        <button class="icon-button" type="button" data-theme-choice="dark" data-i18n-aria="darkTheme" aria-label="Tema oscuro" title="Tema oscuro" aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14A8.7 8.7 0 0 1 10 3.5 8.7 8.7 0 1 0 20.5 14Z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+  <main class="workspace">
+    <aside class="controls">
+      <section>
+        <h2 data-en="Image">Imagen</h2>
+        <label class="file-picker">
+          <input id="file" type="file" accept=".png,image/png">
+          <span data-en="Open PNG">Abrir PNG</span>
+        </label>
+        <p id="filename" class="muted" aria-live="polite"></p>
+      </section>
+      <fieldset id="editing" disabled>
+        <section>
+          <h2 data-en="Mode">Modo</h2>
+          <div class="row" role="group" data-label-en="Mode" aria-label="Modo">
+            <button type="button" data-mode="paint" aria-pressed="true" data-en="Paint">Pintar</button>
+            <button type="button" data-mode="erase" aria-pressed="false" data-en="Erase">Borrar</button>
+          </div>
+        </section>
+        <section>
+          <h2 data-en="Tool">Herramienta</h2>
+          <div class="row tools" role="group" data-label-en="Tool" aria-label="Herramienta">
+            <button type="button" data-tool="brush" aria-pressed="true" data-en="Brush">Pincel</button>
+            <button type="button" data-tool="rectangle" aria-pressed="false" data-en="Rectangle">Rectángulo</button>
+            <button type="button" data-tool="ellipse" aria-pressed="false" data-en="Ellipse">Elipse</button>
+            <button type="button" data-tool="picker" aria-pressed="false" data-en="Eyedropper">Cuentagotas</button>
+          </div>
+          <label class="color-row">
+            <span data-en="Color">Color</span>
+            <input id="color" type="color" value="#2878e8">
+            <output id="hex" for="color">#2878E8</output>
+          </label>
+          <label class="brush-size">
+            <span data-en="Brush size">Tamaño del pincel</span>
+            <input id="brushSize" type="range" min="1" max="32" value="1">
+            <output id="brushSizeValue" for="brushSize">1 px</output>
+          </label>
+        </section>
+        <section>
+          <h2 data-en="Reference background">Fondo de referencia</h2>
+          <div class="color-row">
+            <label><input id="showBackground" type="checkbox"> <span data-en="Show solid color">Mostrar color sólido</span></label>
+            <input id="backgroundColor" type="color" value="#ffffff" data-label-en="Background color" aria-label="Color de fondo">
+          </div>
+        </section>
+        <section>
+          <h2>Zoom</h2>
+          <div class="row zoom" role="group" aria-label="Zoom">
+            <button type="button" id="zoomOut" data-label-en="Zoom out" aria-label="Alejar">−</button>
+            <output id="zoomLevel">—</output>
+            <button type="button" id="zoomIn" data-label-en="Zoom in" aria-label="Acercar">+</button>
+            <button type="button" id="fit" data-en="Fit">Ajustar</button>
+          </div>
+        </section>
+        <div class="actions">
+          <button type="button" id="export" class="primary" data-en="Export PNG">Exportar PNG</button>
+          <button type="button" id="clear" class="danger" data-en="Clear workspace">Limpiar espacio de trabajo</button>
+        </div>
+      </fieldset>
+      <p id="notice" class="notice" role="status"></p>
+    </aside>
+
+    <section class="preview" data-label-en="Editing area" aria-label="Área de edición">
+      <div class="preview-header">
+        <h2 data-en="Canvas">Lienzo</h2>
+        <output id="dimensions">—</output>
+      </div>
+      <div id="viewport" class="viewport">
+        <div id="empty" class="empty">
+          <strong data-en="Drop a PNG here">Arrastra un PNG aquí</strong>
+          <span data-en="or open one from the sidebar">o ábrelo desde el panel lateral</span>
+        </div>
+        <div id="stage" class="stage" hidden>
+          <canvas id="image" data-label-en="Pixel canvas" aria-label="Lienzo de píxeles"></canvas>
+          <canvas id="overlay" aria-hidden="true"></canvas>
+        </div>
+      </div>
+      <div class="preview-footer">
+        <span data-en="The background is only shown in the editor">El fondo solo se muestra en el editor</span>
+        <output id="coordinates">—</output>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

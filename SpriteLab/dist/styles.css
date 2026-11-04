@@ -1,0 +1,114 @@
+/* Shared template tokens and header styles. Tool styles are scoped below. */
+:root {
+  color-scheme: light;
+  --background: #f5f7fa;
+  --surface: #ffffff;
+  --text: #202b3c;
+  --muted: #667489;
+  --border: #dfe5ee;
+  --accent: #2878e8;
+  --selected: #eaf2ff;
+  --hover: #f0f3f8;
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+}
+body[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #111722;
+  --surface: #192230;
+  --text: #e7edf7;
+  --muted: #a0aec2;
+  --border: #303e51;
+  --accent: #70aaff;
+  --selected: #263e60;
+  --hover: #263243;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--background); color: var(--text); }
+.app-header { min-height: 88px; padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; gap: 24px; background: var(--surface); border-bottom: 2px solid var(--accent); }
+h1 { margin: 0; font-size: 21px; font-weight: 650; letter-spacing: 0; }
+.header-controls, .icon-group { display: flex; align-items: center; gap: 6px; }
+.header-controls { gap: 16px; flex-shrink: 0; }
+.icon-button { display: grid; place-items: center; width: 42px; height: 42px; padding: 9px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--muted); cursor: pointer; }
+.icon-button:hover { background: var(--hover); color: var(--text); }
+.icon-button[aria-pressed="true"] { color: var(--accent); background: var(--selected); border-color: var(--accent); }
+.icon-button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.65; stroke-linecap: round; stroke-linejoin: round; }
+.control-divider { height: 24px; width: 1px; background: var(--border); }
+.workspace { max-width: 1280px; margin: 0 auto; padding: 48px 40px; }
+@media (max-width: 600px) {
+  .app-header { padding: 18px 20px; flex-wrap: wrap; gap: 16px; }
+  h1 { font-size: 19px; }
+  .header-controls { margin-left: auto; }
+  .workspace { padding: 24px 16px; }
+  .tool-module { min-height: 360px; }
+}
+
+
+body[data-theme="light"] {
+  --background: #f1f0ec;
+  --panel: #faf9f6;
+  --border: #dcdcd6;
+  --checker-a: #fff;
+  --checker-b: #dce1e8;
+}
+body[data-theme="dark"] {
+  --panel: var(--surface);
+  --checker-a: #263243;
+  --checker-b: #38475b;
+}
+.workspace { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 24px; }
+.controls { min-width: 0; }
+.controls section { padding: 14px 0; border-bottom: 1px solid var(--border); }
+.controls > section { padding-top: 0; }
+h2 { margin: 0 0 10px; font-size: .91rem; font-weight: 700; }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+fieldset:disabled { opacity: .52; }
+button, input { font: inherit; }
+.row { display: flex; gap: 8px; align-items: center; }
+.row button, .actions button { 
+  padding: 8px 10px; min-height: 38px; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--panel); color: var(--text); cursor: pointer; font-size: .85rem;
+}
+button:disabled { cursor: default; }
+.row button:hover:not(:disabled) { background: var(--hover); }
+.row button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--selected); }
+.row:not(.zoom) button { flex: 1; }
+.row.tools, .actions { display: grid; grid-template-columns: 1fr 1fr; }
+.actions { gap: 8px; grid-template-columns: 1fr; margin-top: 14px; }
+.actions .primary { background: #2367c8; color: white; border-color: transparent; font-weight: 650; }
+.actions .primary:hover:not(:disabled) { background: #1855ad; }
+.actions .danger { color: #b02c25; }
+body[data-theme="dark"] .actions .danger { color: #ffaba5; }
+.actions .danger:hover:not(:disabled) { background: var(--hover); }
+.file-picker { position: relative; display: grid; place-items: center; min-height: 54px; border: 1px dashed var(--border); border-radius: 8px; background: var(--panel); cursor: pointer; font-size: .85rem; font-weight: 650; }
+.file-picker:hover, .viewport.dragging { border-color: var(--accent); }
+.file-picker input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+button:focus-visible, .file-picker:focus-within, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.color-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: .85rem; }
+.brush-size { display: grid; grid-template-columns: auto minmax(35px, 1fr) 42px; align-items: center; gap: 8px; margin-top: 12px; font-size: .85rem; }
+.brush-size input { width: 100%; margin: 0; }
+.brush-size output { text-align: right; }
+input[type="range"], input[type="checkbox"] { accent-color: var(--accent); }
+input[type="color"] { width: 40px; height: 30px; padding: 2px; border: 1px solid var(--border); border-radius: 5px; background: var(--panel); cursor: pointer; }
+output { font-variant-numeric: tabular-nums; }
+#zoomLevel { min-width: 64px; text-align: center; font-size: .85rem; }
+.muted, .notice { margin: 8px 0 0; color: var(--muted); font-size: .8rem; overflow-wrap: anywhere; }
+.preview { min-width: 0; }
+.preview-header, .preview-footer { display: flex; justify-content: space-between; gap: 12px; align-items: center; color: var(--muted); font-size: .8rem; }
+.preview-header { margin-bottom: 10px; }
+.preview-header h2 { margin: 0; color: var(--text); }
+.preview-footer { margin-top: 10px; }
+.viewport { height: min(65vh, 620px); min-height: 320px; overflow: auto; display: flex; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--panel); }
+.empty { margin: auto; text-align: center; display: grid; gap: 6px; color: var(--muted); }
+.empty strong { color: var(--text); }
+.stage { position: relative; flex: none; margin: auto; background: repeating-conic-gradient(var(--checker-a) 0 25%, var(--checker-b) 0 50%) 0 0 / 16px 16px; box-shadow: 0 0 0 1px var(--border); }
+.stage.solid-background { background: var(--reference-background); }
+.stage canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+#image { touch-action: none; cursor: crosshair; }
+#overlay { position: absolute; inset: 0; pointer-events: none; }
+[hidden] { display: none !important; }
+@media (max-width: 760px) {
+  .workspace { grid-template-columns: 1fr; }
+  .preview { grid-row: 1; }
+  .viewport { height: 50vh; min-height: 220px; }
+}
