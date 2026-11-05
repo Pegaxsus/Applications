@@ -23,6 +23,74 @@ let mode = 'paint';
 let zoom = 1;
 let fit = true;
 let stroke;
+const undoStack = [];
+const redoStack = [];
+const tileSize = 64;
+const historyLimit = 96 * 1024 * 1024;
+let historyBytes = 0;
+
+function updateHistoryButtons() {
+  byId('undo').disabled = !undoStack.length;
+  byId('redo').disabled = !redoStack.length;
+}
+
+function resetHistory() {
+  undoStack.length = redoStack.length = 0;
+  historyBytes = 0;
+  updateHistoryButtons();
+}
+
+function rememberTiles(action, x, y, width, height) {
+  const right = Math.min(x + width, image.width);
+  const bottom = Math.min(y + height, image.height);
+  for (let top = Math.floor(Math.max(0, y) / tileSize) * tileSize; top < bottom; top += tileSize) {
+    for (let left = Math.floor(Math.max(0, x) / tileSize) * tileSize; left < right; left += tileSize) {
+      const key = top * image.width + left;
+      if (action.tiles.has(key)) continue;
+      const data = pixels.getImageData(left, top, Math.min(tileSize, image.width - left),
+        Math.min(tileSize, image.height - top));
+      action.tiles.set(key, { left, top, data });
+      action.bytes += data.data.byteLength;
+    }
+  }
+}
+
+function commitAction(action) {
+  if (!action.tiles.size) return;
+  for (const entry of redoStack) historyBytes -= entry.bytes;
+  redoStack.length = 0;
+  undoStack.push(action);
+  historyBytes += action.bytes;
+  while (historyBytes > historyLimit && undoStack.length > 1) {
+    historyBytes -= undoStack.shift().bytes;
+  }
+  updateHistoryButtons();
+}
+
+function restoreAction(from, to) {
+  if (stroke) finishStroke();
+  const action = from.pop();
+  if (!action) return;
+  for (const tile of action.tiles.values()) {
+    const { left, top, data } = tile;
+    tile.data = pixels.getImageData(left, top, data.width, data.height);
+    pixels.putImageData(data, left, top);
+  }
+  to.push(action);
+  updateHistoryButtons();
+}
+
+byId('undo').addEventListener('click', () => restoreAction(undoStack, redoStack));
+byId('redo').addEventListener('click', () => restoreAction(redoStack, undoStack));
+document.addEventListener('keydown', event => {
+  if (!filename || !(event.ctrlKey || event.metaKey) || event.altKey ||
+      event.target.closest?.('input, textarea, select, [contenteditable]')) return;
+  const key = event.key.toLowerCase();
+  if (key !== 'z' && key !== 'y') return;
+  event.preventDefault();
+  if (key === 'y' || event.shiftKey) restoreAction(redoStack, undoStack);
+  else restoreAction(undoStack, redoStack);
+});
 
 const messages = {
   es: {
@@ -146,15 +214,33 @@ function fitImage() {
   applyZoom(fitZoom());
 }
 
-function changeZoom(multiplier) {
+function zoomAt(value, x, y) {
+  if (stroke) return;
+  const before = image.getBoundingClientRect();
+  const ratioX = (x - before.left) / before.width;
+  const ratioY = (y - before.top) / before.height;
   fit = false;
-  applyZoom(zoom * multiplier);
+  applyZoom(value);
+  const after = image.getBoundingClientRect();
+  viewport.scrollLeft += after.left + ratioX * after.width - x;
+  viewport.scrollTop += after.top + ratioY * after.height - y;
+}
+
+function zoomFromCenter(value) {
+  const bounds = viewport.getBoundingClientRect();
+  zoomAt(value, bounds.left + viewport.clientWidth / 2, bounds.top + viewport.clientHeight / 2);
 }
 
 new ResizeObserver(() => { if (filename && fit) fitImage(); }).observe(viewport);
-byId('zoomOut').addEventListener('click', () => changeZoom(1 / 1.5));
-byId('zoomIn').addEventListener('click', () => changeZoom(1.5));
+byId('zoomOut').addEventListener('click', () => zoomFromCenter(zoom / 1.5));
+byId('zoomIn').addEventListener('click', () => zoomFromCenter(zoom * 1.5));
+byId('actualSize').addEventListener('click', () => zoomFromCenter(1));
 byId('fit').addEventListener('click', fitImage);
+viewport.addEventListener('wheel', event => {
+  if (!filename || !event.deltaY || event.shiftKey || event.ctrlKey || event.metaKey) return;
+  event.preventDefault();
+  zoomAt(zoom * (event.deltaY < 0 ? 1.25 : 1 / 1.25), event.clientX, event.clientY);
+}, { passive: false });
 
 async function load(file) {
   if (!file) return;
@@ -173,6 +259,7 @@ async function load(file) {
     bitmap = await createImageBitmap(file, { imageOrientation: 'none' });
     if (id !== requestId) return;
     finishStroke();
+    resetHistory();
     image.width = overlay.width = bitmap.width;
     image.height = overlay.height = bitmap.height;
     pixels.drawImage(bitmap, 0, 0);
@@ -282,9 +369,13 @@ function drawShape(shape, from, to, write) {
 }
 
 function pixelWriter(context, gesture, isPreview = false) {
-  if (!isPreview && gesture.mode === 'erase') return context.clearRect.bind(context);
   context.fillStyle = gesture.mode === 'erase' ? 'rgba(226, 66, 55, .42)' : gesture.color;
-  return context.fillRect.bind(context);
+  if (isPreview) return context.fillRect.bind(context);
+  const write = gesture.mode === 'erase' ? context.clearRect.bind(context) : context.fillRect.bind(context);
+  return (x, y, width, height) => {
+    rememberTiles(gesture.action, x, y, width, height);
+    write(x, y, width, height);
+  };
 }
 
 function finishStroke(end) {
@@ -297,6 +388,7 @@ function finishStroke(end) {
     if (gesture.tool === 'brush') brushLine(gesture.last, end, gesture.size, write);
     else drawShape(gesture.tool, gesture.start, end, write);
   }
+  commitAction(gesture.action);
   if (image.hasPointerCapture(gesture.id)) image.releasePointerCapture(gesture.id);
 }
 
@@ -316,6 +408,7 @@ image.addEventListener('pointerdown', event => {
   }
   updateNotice('');
   stroke = { id: event.pointerId, start: point, last: point, tool, mode, color: color.value, size: brushSize.valueAsNumber };
+  stroke.action = { tiles: new Map(), bytes: 0 };
   image.setPointerCapture(event.pointerId);
   if (tool === 'brush') brushLine(point, point, stroke.size, pixelWriter(pixels, stroke));
   else drawShape(tool, point, point, pixelWriter(preview, stroke, true));
@@ -356,6 +449,7 @@ image.addEventListener('pointerleave', () => { byId('coordinates').textContent =
 byId('clear').addEventListener('click', () => {
   requestId++;
   finishStroke();
+  resetHistory();
   filename = '';
   image.width = image.height = overlay.width = overlay.height = 1;
   stage.hidden = true;
