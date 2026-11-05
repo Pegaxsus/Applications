@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Editor local de diagramas de flujo.">
+  <title>FlowDiagDesigner</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="diagram.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body data-theme="light">
+<header class="app-header">
+  <div class="brand"><span class="brand-icon" data-icon="diagram"></span><div><h1>FlowDiagDesigner</h1><p>Editor de diagramas de flujo</p></div></div>
+  <div class="header-controls" aria-label="Acciones del diagrama">
+    <div class="group">
+      <button id="undo" data-icon="undo" title="Deshacer (Ctrl+Z)" aria-label="Deshacer"></button>
+      <button id="redo" data-icon="redo" title="Rehacer (Ctrl+Mayús+Z)" aria-label="Rehacer"></button>
+      <button id="format" data-icon="format" title="Copiar el formato al siguiente objeto" aria-label="Copiar formato" aria-pressed="false" disabled></button>
+    </div>
+    <div class="group">
+      <button id="lock" data-icon="unlock" title="Bloquear lienzo" aria-label="Bloquear lienzo" aria-pressed="false"></button>
+      <button id="clear" data-icon="trash" title="Limpiar lienzo" aria-label="Limpiar lienzo"></button>
+      <button id="theme" data-icon="moon" title="Cambiar tema" aria-label="Tema oscuro" aria-pressed="false"></button>
+    </div>
+    <div class="group files">
+      <button id="open" data-icon="folder">Importar</button>
+      <button id="save" data-icon="save">Guardar</button>
+      <button id="export" class="primary" data-icon="download">Exportar PNG</button>
+    </div>
+  </div>
+</header>
+<main class="workspace">
+  <aside id="tools" class="panel tools" aria-label="Herramientas">
+    <div class="panel-head"><h2>Herramientas</h2><button id="collapse" data-icon="panel" aria-label="Contraer herramientas" title="Contraer herramientas" aria-controls="palette" aria-expanded="true"></button></div>
+    <div id="palette">
+      <section>
+        <h3>EDICIÓN</h3>
+        <div class="tool-list">
+          <button data-mode="select" data-icon="cursor" title="Seleccionar (V)">Seleccionar <kbd>V</kbd></button>
+          <button data-mode="text" data-icon="text" title="Insertar texto (T)">Texto <kbd>T</kbd></button>
+          <button id="image" data-icon="image">Imagen o icono</button>
+          <button data-mode="port" data-icon="port" title="Añadir punto (P)">Punto de conexión <kbd>P</kbd></button>
+        </div>
+      </section>
+      <section>
+        <h3>FORMAS</h3>
+        <div id="shapes" class="shape-list" aria-label="Formas geométricas y de flujo"></div>
+        <p class="hint">Elige una forma y haz clic en el lienzo. También puedes arrastrar para darle tamaño.</p>
+      </section>
+    </div>
+  </aside>
+
+  <section class="panel stage" aria-label="Lienzo del diagrama">
+    <div class="panel-head stage-head"><h2>Lienzo <span id="lock-badge" hidden>Bloqueado</span></h2><button id="grid" data-icon="grid" aria-pressed="true" title="Mostrar u ocultar la cuadrícula">Cuadrícula</button></div>
+    <div id="viewport" class="viewport">
+      <svg id="board" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" aria-label="Superficie de dibujo"></svg>
+      <div id="empty" class="empty">
+        <span class="empty-icon" data-icon="diagram"></span>
+        <strong>Empieza tu diagrama</strong>
+        <p>Coloca una forma o un texto en el lienzo<br>para empezar a dibujar el flujo.</p>
+        <button id="start" data-icon="plus">Añadir rectángulo</button>
+      </div>
+    </div>
+    <div class="stage-foot">
+      <span id="status" aria-live="polite"></span>
+      <div class="zoom group" aria-label="Zoom">
+        <button id="minus" data-icon="minus" title="Alejar" aria-label="Alejar"></button>
+        <button id="zoom" title="Restablecer al 100 %">100 %</button>
+        <button id="plus" data-icon="plus" title="Acercar" aria-label="Acercar"></button>
+        <button id="fit" data-icon="fit" title="Ajustar lienzo a la vista" aria-label="Ajustar a la vista"></button>
+      </div>
+    </div>
+  </section>
+
+  <aside class="panel inspector" aria-label="Propiedades">
+    <div class="panel-head"><h2>Propiedades</h2><span class="head-icon" data-icon="sliders"></span></div>
+    <div id="properties"></div>
+  </aside>
+</main>
+<input type="file" id="image-file" accept=".png,.jpg,.jpeg,.webp,.gif,.svg,.ico,.avif,.bmp,image/*" hidden>
+<input type="file" id="project-file" accept=".json,application/json" hidden>
+</body>
+</html>
