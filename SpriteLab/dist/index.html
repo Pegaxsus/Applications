@@ -11,7 +11,7 @@
 <header class="app-header">
     <h1 data-i18n="toolTitle">SpriteLab</h1>
     <div class="header-controls">
-      <button type="button" id="toggleControls" aria-controls="controls" aria-expanded="true" data-en="Controls">Controles</button>
+      <button type="button" id="showVersions" aria-haspopup="dialog" data-en="Versions">Versiones</button>
       <div class="icon-group" role="group" data-i18n-aria="languageGroup" aria-label="Idioma">
         <button class="icon-button" type="button" data-language="es" aria-label="Español" title="Español" aria-pressed="true">
           <svg viewBox="0 0 32 24" aria-hidden="true"><rect x="2" y="3" width="28" height="18" rx="2"/><path d="M2 8h28M2 16h28"/><path d="M10 10v4c0 2 4 2 4 0v-4zM10 12h4"/></svg>
@@ -32,25 +32,22 @@
     </div>
   </header>
   <main class="workspace">
-    <aside id="controls" class="controls">
-      <section>
-        <h2 data-en="Image">Imagen</h2>
+    <aside class="controls">
+      <details open><summary data-en="Image">Imagen</summary>
         <label class="file-picker">
           <input id="file" type="file" accept=".png,image/png">
           <span data-en="Open PNG">Abrir PNG</span>
         </label>
         <p id="filename" class="muted" aria-live="polite"></p>
-      </section>
+      </details>
       <fieldset id="editing" disabled>
-        <section>
-          <h2 data-en="Mode">Modo</h2>
+        <details open><summary data-en="Mode">Modo</summary>
           <div class="row" role="group" data-label-en="Mode" aria-label="Modo">
             <button type="button" data-mode="paint" aria-pressed="true" data-en="Paint">Pintar</button>
             <button type="button" data-mode="erase" aria-pressed="false" data-en="Erase">Borrar</button>
           </div>
-        </section>
-        <section>
-          <h2 data-en="Tool">Herramienta</h2>
+        </details>
+        <details open><summary data-en="Tool">Herramienta</summary>
           <div class="row tools" role="group" data-label-en="Tool" aria-label="Herramienta">
             <button type="button" data-tool="brush" aria-pressed="true" data-en="Brush">Pincel</button>
             <button type="button" data-tool="rectangle" aria-pressed="false" data-en="Rectangle">Rectángulo</button>
@@ -67,16 +64,14 @@
             <input id="brushSize" type="range" min="1" max="32" value="1">
             <output id="brushSizeValue" for="brushSize">1 px</output>
           </label>
-        </section>
-        <section>
-          <h2 data-en="Reference background">Fondo de referencia</h2>
+        </details>
+        <details open><summary data-en="Reference background">Fondo de referencia</summary>
           <div class="color-row">
             <label><input id="showBackground" type="checkbox"> <span data-en="Show solid color">Mostrar color sólido</span></label>
             <input id="backgroundColor" type="color" value="#ffffff" data-label-en="Background color" aria-label="Color de fondo">
           </div>
-        </section>
-        <section>
-          <h2>Zoom</h2>
+        </details>
+        <details open><summary>Zoom</summary>
           <div class="row zoom" role="group" aria-label="Zoom">
             <button type="button" id="zoomOut" data-label-en="Zoom out" aria-label="Alejar">−</button>
             <output id="zoomLevel">—</output>
@@ -85,15 +80,15 @@
             <button type="button" id="fit" data-en="Fit">Ajustar</button>
           </div>
           <p class="muted" data-en="Mouse wheel over the canvas to zoom">Usa la rueda sobre el lienzo para ampliar o reducir</p>
-        </section>
-        <section>
-          <h2 data-en="History">Historial</h2>
+        </details>
+        <details open><summary data-en="History">Historial</summary>
           <div class="row">
             <button type="button" id="undo" disabled aria-keyshortcuts="Control+Z Meta+Z" data-en="Undo">Deshacer</button>
             <button type="button" id="redo" disabled aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z Control+Y Meta+Y" data-en="Redo">Rehacer</button>
           </div>
-        </section>
-        <div class="actions">
+        </details>
+        <details open><summary data-en="Export and crop">Exportación y recorte</summary>
+          <div class="actions">
           <div class="row">
             <button type="button" data-tool="crop" aria-pressed="false" data-en="Crop">Recortar</button>
             <button type="button" id="clearCrop" disabled data-en="Remove crop">Quitar recorte</button>
@@ -103,6 +98,7 @@
           <button type="button" id="export" class="primary"><span id="exportFull" data-en="Export PNG">Exportar PNG</span><span id="exportCrop" hidden data-en="Export cropped PNG">Exportar PNG recortado</span></button>
           <button type="button" id="clear" class="danger" data-en="Clear workspace">Limpiar espacio de trabajo</button>
         </div>
+        </details>
       </fieldset>
       <p id="notice" class="notice" role="status"></p>
     </aside>
@@ -129,5 +125,16 @@
       </div>
     </section>
   </main>
+  <dialog id="versions" aria-labelledby="versionsTitle">
+    <h2 id="versionsTitle" data-en="Versions">Versiones</h2>
+    <ol reversed class="version-list">
+      <li><strong>1.4</strong> <span data-en="Collapsible categories, version history, and right-button canvas panning.">Categorías plegables, historial de versiones y arrastre del lienzo con el botón derecho.</span></li>
+      <li><strong>1.3</strong> <span data-en="Crop selection and preview before exporting the PNG.">Selección y vista previa del recorte antes de exportar el PNG.</span></li>
+      <li><strong>1.2</strong> <span data-en="Pointer-centered wheel zoom, actual size, and undo and redo.">Zoom con la rueda centrado en el puntero, tamaño real, deshacer y rehacer.</span></li>
+      <li><strong>1.1</strong> <span data-en="Adjustable brush size, reference background color, and shape dragging beyond the image.">Tamaño de pincel ajustable, fondo de referencia y arrastre de formas fuera de la imagen.</span></li>
+      <li><strong>1.0</strong> <span data-en="PNG editing with a brush, shapes, color picker, transparent erasing, zoom, export, and workspace clearing.">Edición de PNG con pincel, formas, cuentagotas, borrado transparente, zoom, exportación y limpieza del espacio de trabajo.</span></li>
+    </ol>
+    <form method="dialog"><button type="submit" data-en="Close" autofocus>Cerrar</button></form>
+  </dialog>
 </body>
 </html>

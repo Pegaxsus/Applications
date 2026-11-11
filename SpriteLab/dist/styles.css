@@ -57,12 +57,17 @@ body[data-theme="dark"] {
   --checker-b: #38475b;
 }
 .workspace { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 24px; }
-.workspace.controls-collapsed { grid-template-columns: minmax(0, 1fr); }
-#toggleControls { padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text); cursor: pointer; }
-#toggleControls:hover { background: var(--hover); }
+#showVersions, #versions button { padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text); cursor: pointer; }
+#showVersions:hover, #versions button:hover { background: var(--hover); }
+#versions { width: min(540px, calc(100% - 32px)); padding: 22px; border: 1px solid var(--border); border-radius: 8px; background: var(--panel); color: var(--text); }
+#versions::backdrop { background: rgb(0 0 0 / 45%); }
+.version-list { list-style: none; margin: 0 0 16px; padding: 0; font-size: .9rem; }
+.version-list li + li { margin-top: 10px; }
+.version-list strong { margin-right: 4px; }
 .controls { min-width: 0; }
-.controls section { padding: 14px 0; border-bottom: 1px solid var(--border); }
-.controls > section { padding-top: 0; }
+.controls details { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.controls summary { padding: 4px 0; font-size: .91rem; font-weight: 700; cursor: pointer; }
+.controls details[open] > summary { margin-bottom: 6px; }
 h2 { margin: 0 0 10px; font-size: .91rem; font-weight: 700; }
 fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 fieldset:disabled { opacity: .52; }
@@ -109,6 +114,7 @@ output { font-variant-numeric: tabular-nums; }
 .stage.solid-background { background: var(--reference-background); }
 .stage canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
 #image { touch-action: none; cursor: crosshair; }
+.viewport.panning, .viewport.panning #image { cursor: grabbing; user-select: none; }
 #overlay { position: absolute; inset: 0; pointer-events: none; }
 .stage { overflow: hidden; }
 #cropFrame { position: absolute; pointer-events: none; outline: 2px solid var(--accent); outline-offset: -2px; box-shadow: 0 0 0 150000px rgb(0 0 0 / 42%); }

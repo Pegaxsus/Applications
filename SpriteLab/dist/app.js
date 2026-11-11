@@ -25,13 +25,43 @@ let fit = true;
 let stroke;
 let crop;
 const cropFrame = byId('cropFrame');
-const controls = byId('controls');
+let pan;
 
-byId('toggleControls').addEventListener('click', event => {
-  controls.hidden = !controls.hidden;
-  controls.parentElement.classList.toggle('controls-collapsed', controls.hidden);
-  event.currentTarget.setAttribute('aria-expanded', String(!controls.hidden));
+byId('showVersions').addEventListener('click', () => byId('versions').showModal());
+
+viewport.addEventListener('contextmenu', event => {
+  if (filename) event.preventDefault();
 });
+
+viewport.addEventListener('pointerdown', event => {
+  if (!filename || stroke || event.button !== 2) return;
+  event.preventDefault();
+  pan = { id: event.pointerId, x: event.clientX, y: event.clientY,
+    left: viewport.scrollLeft, top: viewport.scrollTop };
+  viewport.setPointerCapture(event.pointerId);
+  viewport.classList.add('panning');
+});
+
+function endPan(event) {
+  if (pan?.id !== event.pointerId) return;
+  pan = undefined;
+  viewport.classList.remove('panning');
+  if (viewport.hasPointerCapture(event.pointerId)) viewport.releasePointerCapture(event.pointerId);
+}
+
+viewport.addEventListener('pointermove', event => {
+  if (pan?.id !== event.pointerId) return;
+  if (!(event.buttons & 2)) {
+    endPan(event);
+    return;
+  }
+  viewport.scrollLeft = pan.left + pan.x - event.clientX;
+  viewport.scrollTop = pan.top + pan.y - event.clientY;
+});
+
+for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+  viewport.addEventListener(type, endPan);
+}
 
 function cropBounds(start, end) {
   const x = Math.max(0, Math.min(start.x, end.x));
@@ -256,7 +286,7 @@ function fitImage() {
 }
 
 function zoomAt(value, x, y) {
-  if (stroke) return;
+  if (stroke || pan) return;
   const before = image.getBoundingClientRect();
   const ratioX = (x - before.left) / before.width;
   const ratioY = (y - before.top) / before.height;
@@ -440,7 +470,7 @@ function finishStroke(end) {
 }
 
 image.addEventListener('pointerdown', event => {
-  if (event.button !== 0 || stroke) return;
+  if (event.button !== 0 || stroke || pan) return;
   const point = locate(event);
   if (tool === 'picker') {
     const [r, g, b, alpha] = pixels.getImageData(point.x, point.y, 1, 1).data;
