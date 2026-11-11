@@ -11,6 +11,7 @@
 <header class="app-header">
     <h1 data-i18n="toolTitle">SpriteLab</h1>
     <div class="header-controls">
+      <button type="button" id="toggleControls" aria-controls="controls" aria-expanded="true" data-en="Controls">Controles</button>
       <div class="icon-group" role="group" data-i18n-aria="languageGroup" aria-label="Idioma">
         <button class="icon-button" type="button" data-language="es" aria-label="Español" title="Español" aria-pressed="true">
           <svg viewBox="0 0 32 24" aria-hidden="true"><rect x="2" y="3" width="28" height="18" rx="2"/><path d="M2 8h28M2 16h28"/><path d="M10 10v4c0 2 4 2 4 0v-4zM10 12h4"/></svg>
@@ -31,7 +32,7 @@
     </div>
   </header>
   <main class="workspace">
-    <aside class="controls">
+    <aside id="controls" class="controls">
       <section>
         <h2 data-en="Image">Imagen</h2>
         <label class="file-picker">
@@ -93,7 +94,13 @@
           </div>
         </section>
         <div class="actions">
-          <button type="button" id="export" class="primary" data-en="Export PNG">Exportar PNG</button>
+          <div class="row">
+            <button type="button" data-tool="crop" aria-pressed="false" data-en="Crop">Recortar</button>
+            <button type="button" id="clearCrop" disabled data-en="Remove crop">Quitar recorte</button>
+          </div>
+          <p id="cropHint" class="muted" hidden data-en="Drag on the canvas to select the area to export.">Arrastra sobre el lienzo para seleccionar el área que quieres exportar.</p>
+          <output id="cropSize" class="muted" aria-live="polite" hidden></output>
+          <button type="button" id="export" class="primary"><span id="exportFull" data-en="Export PNG">Exportar PNG</span><span id="exportCrop" hidden data-en="Export cropped PNG">Exportar PNG recortado</span></button>
           <button type="button" id="clear" class="danger" data-en="Clear workspace">Limpiar espacio de trabajo</button>
         </div>
       </fieldset>
@@ -113,6 +120,7 @@
         <div id="stage" class="stage" hidden>
           <canvas id="image" data-label-en="Pixel canvas" aria-label="Lienzo de píxeles"></canvas>
           <canvas id="overlay" aria-hidden="true"></canvas>
+          <div id="cropFrame" hidden aria-hidden="true"></div>
         </div>
       </div>
       <div class="preview-footer">

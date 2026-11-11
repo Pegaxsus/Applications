@@ -23,6 +23,46 @@ let mode = 'paint';
 let zoom = 1;
 let fit = true;
 let stroke;
+let crop;
+const cropFrame = byId('cropFrame');
+const controls = byId('controls');
+
+byId('toggleControls').addEventListener('click', event => {
+  controls.hidden = !controls.hidden;
+  controls.parentElement.classList.toggle('controls-collapsed', controls.hidden);
+  event.currentTarget.setAttribute('aria-expanded', String(!controls.hidden));
+});
+
+function cropBounds(start, end) {
+  const x = Math.max(0, Math.min(start.x, end.x));
+  const y = Math.max(0, Math.min(start.y, end.y));
+  const right = Math.min(image.width, Math.max(start.x, end.x) + 1);
+  const bottom = Math.min(image.height, Math.max(start.y, end.y) + 1);
+  return { x, y, width: right - x, height: bottom - y };
+}
+
+function showCrop(bounds = crop) {
+  cropFrame.hidden = !bounds;
+  if (bounds) {
+    cropFrame.style.left = 100 * bounds.x / image.width + '%';
+    cropFrame.style.top = 100 * bounds.y / image.height + '%';
+    cropFrame.style.width = 100 * bounds.width / image.width + '%';
+    cropFrame.style.height = 100 * bounds.height / image.height + '%';
+  }
+  const size = byId('cropSize');
+  size.hidden = !bounds;
+  size.textContent = bounds ? bounds.width + ' × ' + bounds.height + ' px' : '';
+  byId('clearCrop').disabled = !crop;
+  byId('exportCrop').hidden = !crop;
+  byId('exportFull').hidden = Boolean(crop);
+}
+
+function clearCrop() {
+  if (stroke?.tool === 'crop') finishStroke();
+  crop = undefined;
+  showCrop();
+}
+byId('clearCrop').addEventListener('click', clearCrop);
 const undoStack = [];
 const redoStack = [];
 const tileSize = 64;
@@ -165,13 +205,14 @@ function setTheme(value) {
 function setTool(value) {
   tool = value;
   select('tool', tool);
+  byId('cropHint').hidden = tool !== 'crop';
   updateNotice('');
 }
 
 function setMode(value) {
   mode = value;
   select('mode', mode);
-  if (tool === 'picker') setTool('brush');
+  if (tool === 'picker' || tool === 'crop') setTool('brush');
   updateNotice('');
 }
 
@@ -259,6 +300,7 @@ async function load(file) {
     bitmap = await createImageBitmap(file, { imageOrientation: 'none' });
     if (id !== requestId) return;
     finishStroke();
+    clearCrop();
     resetHistory();
     image.width = overlay.width = bitmap.width;
     image.height = overlay.height = bitmap.height;
@@ -383,12 +425,17 @@ function finishStroke(end) {
   const gesture = stroke;
   stroke = undefined;
   preview.clearRect(0, 0, overlay.width, overlay.height);
-  if (end) {
-    const write = pixelWriter(pixels, gesture);
-    if (gesture.tool === 'brush') brushLine(gesture.last, end, gesture.size, write);
-    else drawShape(gesture.tool, gesture.start, end, write);
+  if (gesture.tool === 'crop') {
+    if (end) crop = cropBounds(gesture.start, end);
+    showCrop();
+  } else {
+    if (end) {
+      const write = pixelWriter(pixels, gesture);
+      if (gesture.tool === 'brush') brushLine(gesture.last, end, gesture.size, write);
+      else drawShape(gesture.tool, gesture.start, end, write);
+    }
+    commitAction(gesture.action);
   }
-  commitAction(gesture.action);
   if (image.hasPointerCapture(gesture.id)) image.releasePointerCapture(gesture.id);
 }
 
@@ -410,7 +457,8 @@ image.addEventListener('pointerdown', event => {
   stroke = { id: event.pointerId, start: point, last: point, tool, mode, color: color.value, size: brushSize.valueAsNumber };
   stroke.action = { tiles: new Map(), bytes: 0 };
   image.setPointerCapture(event.pointerId);
-  if (tool === 'brush') brushLine(point, point, stroke.size, pixelWriter(pixels, stroke));
+  if (tool === 'crop') showCrop(cropBounds(point, point));
+  else if (tool === 'brush') brushLine(point, point, stroke.size, pixelWriter(pixels, stroke));
   else drawShape(tool, point, point, pixelWriter(preview, stroke, true));
 });
 
@@ -419,7 +467,9 @@ image.addEventListener('pointermove', event => {
   const inside = point.x >= 0 && point.y >= 0 && point.x < image.width && point.y < image.height;
   byId('coordinates').textContent = inside ? 'X ' + point.x + ' · Y ' + point.y : '—';
   if (stroke?.id !== event.pointerId) return;
-  if (stroke.tool === 'brush') {
+  if (stroke.tool === 'crop') {
+    showCrop(cropBounds(stroke.start, point));
+  } else if (stroke.tool === 'brush') {
     const write = pixelWriter(pixels, stroke);
     const samples = event.getCoalescedEvents?.() ?? [];
     for (const sample of samples) {
@@ -449,6 +499,7 @@ image.addEventListener('pointerleave', () => { byId('coordinates').textContent =
 byId('clear').addEventListener('click', () => {
   requestId++;
   finishStroke();
+  clearCrop();
   resetHistory();
   filename = '';
   image.width = image.height = overlay.width = overlay.height = 1;
@@ -463,7 +514,15 @@ byId('clear').addEventListener('click', () => {
 byId('export').addEventListener('click', () => {
   const name = filename.replace(/\.png$/i, '') + '-spritelab.png';
   const id = requestId;
-  image.toBlob(blob => {
+  let output = image;
+  if (crop) {
+    const { x, y, width, height } = crop;
+    output = document.createElement('canvas');
+    output.width = width;
+    output.height = height;
+    output.getContext('2d').drawImage(image, x, y, width, height, 0, 0, width, height);
+  }
+  output.toBlob(blob => {
     if (!blob) {
       if (id === requestId) updateNotice('exportError');
       return;
