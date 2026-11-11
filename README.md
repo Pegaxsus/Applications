@@ -1,17 +1,21 @@
 # Vibe-Coded-Apps
 
-A collection of small browser tools created with AI assistance for image editing, pattern design, QR codes, 3D model inspection, and Factorio blueprints.
+A collection of nine browser tools created with AI assistance for image editing, pattern design, flowcharts, file comparison, metadata cleanup, QR codes, 3D model inspection, and Factorio blueprints.
 
-Each tool has its own folder and can be opened directly in a modern browser. No installation or build step is required. All five tools offer English and Spanish interfaces, plus light and dark themes.
+Each tool has its own folder and can be opened directly in a modern browser. No installation or build step is required.
 
 ## Explore the tools
 
 | Tool | What you can do | Output |
 | --- | --- | --- |
 | [Factorio: Silhouette to Blueprint](factorio-silhouette-blueprint/) | Turn a silhouette image into a tile layout for Factorio. | Blueprint string, copied or saved as `.txt` |
+| [FlowDiagDesigner](FlowDiagDesigner/) | Build flowcharts with shapes, text, images, and connectors. | Editable JSON or PNG |
+| [Hash Check](hash-check/) | Compare two files by size and SHA-256, SHA-384, or SHA-512 hash. | Copyable hashes and printable HTML, TXT, or JSON reports |
+| [Metadata Cleaner](metadata-cleaner/) | Inspect and remove selected metadata from JPEG, PNG, and WebP files. | Cleaned files or a batch ZIP |
 | [Pattern Generator](pattern-generator/) | Create repeating patterns from an image with custom spacing, transforms, and colors. | PNG or SVG containing an embedded raster image |
 | [QR Generator](qr-generator/) | Generate static QR codes from URLs or text, with adjustable colors and error correction. | PNG or vector SVG |
 | [Quick Image Cut](quick-image-cut/) | Crop images with precise pixel dimensions and an interactive selection. | Cropped image |
+| [SpriteLab](SpriteLab/dist/) | Paint, erase, and crop PNG sprites with pixel-level controls. | Full or cropped PNG |
 | [Local STL Viewer](stl-viewer/) | Inspect ASCII or binary STL models with interactive 3D controls. | On-screen 3D preview and mesh statistics |
 
 ## Factorio: Silhouette to Blueprint
@@ -28,6 +32,24 @@ Convert a high-contrast silhouette into a Factorio tile blueprint for platform s
 Black shapes on white or transparent backgrounds work best. Space platform foundation is intended for Factorio: Space Age.
 
 [Usage and details](factorio-silhouette-blueprint/README.md)
+
+## FlowDiagDesigner
+
+Create flowcharts with shapes, text, images, and custom connection points. Style connectors and arrows, lock elements, and copy formatting between compatible elements. Save an editable JSON project to reopen later or export the full diagram as PNG.
+
+[Usage and details](FlowDiagDesigner/README.md)
+
+## Hash Check
+
+Compare two files by size and content hash using SHA-256, SHA-384, or SHA-512. Copy the hashes or export a printable HTML, TXT, or JSON report. Each file can be up to 256 MiB. Hashing requires browser support for Web Crypto and workers.
+
+[Usage and details](hash-check/README.md)
+
+## Metadata Cleaner
+
+Review metadata by category or field, then remove selected entries or all removable metadata. The tool preserves image data without recompression and supports individual downloads or batch ZIP exports. TXT files are copied byte for byte.
+
+[Usage and details](metadata-cleaner/README.md)
 
 ## Pattern Generator
 
@@ -72,6 +94,12 @@ PNG, JPEG, and WebP inputs export in their matching formats. Other browser-reada
 
 [Usage and details](quick-image-cut/README.md)
 
+## SpriteLab
+
+Open a PNG and edit it with a brush, rectangle, ellipse, eyedropper, and transparent eraser. Zoom and pan the canvas, preview the sprite against a reference background, and undo or redo edits. Export the full image or a selected crop as PNG. The reference background is only shown in the editor.
+
+Open [`SpriteLab/dist/index.html`](SpriteLab/dist/index.html) from your local copy.
+
 ## Local STL Viewer
 
 Inspect STL geometry in an interactive WebGL preview without uploading the model.
@@ -91,8 +119,7 @@ An internet connection is required to load Three.js and its controls from unpkg.
 
 1. Download the repository using **Code → Download ZIP** and extract it, or clone it with Git.
 2. Open the folder of the tool you want to use.
-3. Open its `index.html` in a modern browser.
-4. Load your image or STL file, or enter text for the QR generator, and adjust the controls.
+3. Open its `index.html` in a modern browser. For SpriteLab, open `SpriteLab/dist/index.html`.
 
 For local development, you can also serve the repository from its root with Python:
 
@@ -106,9 +133,9 @@ GitHub's file preview shows the source code; download the files and open them lo
 
 ## Local processing and connectivity
 
-Images, QR payloads, STL models, and blueprint generation are processed in your browser. The tools do not upload these inputs to a processing server.
+The tools process files, diagrams, and QR payloads in your browser without uploading them to a processing server.
 
-Factorio: Silhouette to Blueprint, Pattern Generator, QR Generator, and Quick Image Cut can operate offline. Local STL Viewer fetches its 3D dependencies from a CDN. Optional external links, such as attribution or support links, require connectivity when followed. Language and theme preferences may be saved in browser storage.
+Eight tools can operate offline. Local STL Viewer fetches its 3D dependencies from a CDN. Optional external links, such as attribution or support links, require connectivity when followed. Language and theme preferences may be saved in browser storage.
 
 ## About and licensing
 
